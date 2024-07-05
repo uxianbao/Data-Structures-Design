@@ -53,7 +53,6 @@ This project revolves around the development of a smart warehouse management sys
 The data structures we use in the project include linked lists, trees, and heaps. Firstly, we installed extensions to Python, Rainbow CSV, Code Runner, and Coverage Gutters in VsCode.The following image shows our directory file structure:
 
 <p align="center">
-
     <img src="screenshot/图片1.png" alt="root directory">
 </p>
 
@@ -192,7 +191,6 @@ This code implements an efficient item search functionality in a category tree s
 **(c)remove_item(item_ID)**:
 
 ```python
-
     def remove_item(self, item_ID):
         current = self.head
         previous = None
@@ -219,7 +217,6 @@ This code implements the functionality to remove an element with a specified ite
 **(d)update_quantity(item_ID, quantity)**:
 
 ```python
-
     def update_quantity(self, item_ID, quantity):
         current = self.head
         while current:
@@ -227,7 +224,7 @@ This code implements the functionality to remove an element with a specified ite
                 current.item.quantity = quantity
                 return
             current = current.next
-  ```
+```
 
 This code snippet updates the quantity of an item with a specific ID in a linked list.
 
@@ -242,7 +239,6 @@ This code snippet updates the quantity of an item with a specific ID in a linked
 **(e)sort_by_id()**:
 
 ```python
-
     def sort_by_id(self):
         if not self.head or not self.head.next:
             return
@@ -276,3 +272,180 @@ This code snippet implements sorting of a linked list based on item IDs using th
 - **Simple Traversal:** Suitable for operations that require frequent traversal of all items.
 
 - **Application:** Used to store and manage the basic list of all inventory items.
+
+### 4.2 CategoryTree Implementation
+
+This is an implementation of a binary search tree, used to organize warehouse items by category.
+
+#### 4.2.1 TreeNode class
+
+```python
+    class TreeNode:
+        def __init__(self, category):
+            self.category = category
+            self.items = LinkedList()
+            self.left = None  
+            self.right = None  
+```
+
+Represents a node in the tree.
+
+Contains: category, items (LinkedList storing items of this category), left and right (child nodes).
+
+#### 4.2.2 CategoryTree class
+
+```python
+    class CategoryTree:
+        def __init__(self):
+            self.root = None
+```
+
+root: points to the root node of the tree.
+
+#### 4.2.3 Main methods
+
+**(a) find_by_category(category)**:
+
+```python
+    def find_by_category(self, category):
+        return self._find_by_category(self.root, category)
+
+    def _find_by_category(self, node, category):
+        if node is None:
+            return None
+        if category.value == node.category.value:
+            return node.items
+        elif category.value < node.category.value:
+            return self._find_by_category(node.left, category)
+        else:
+            return self._find_by_category(node.right, category)
+```
+
+Code Optimization for Finding Items by Category in Category Tree
+
+- **Recursive Traversal Approach:**
+  - Implement a recursive method to traverse the category tree.
+  - Compare the category value of nodes with the target category.
+  - Return the linked list of items if a matching category node is found.
+
+- **Handling Subtrees:**
+  - If the target category value is less than the current node, continue searching in the left subtree.
+  - If the target category value is greater than the current node, search in the right subtree.
+
+- **Base Case:**
+  - If the traversal reaches a null node (leaf or not found), return `None` to indicate no matching category was found.
+
+**(b) find_by_name(name)**:
+
+```python
+    def find_by_name(self, name):
+        result = []
+        self._find_by_name(self.root, name, result)
+        return result
+        
+    def _find_by_name(self, node, name, result):
+        if node is None:
+            return
+        current = node.items.head
+        while current:
+            if current.item.name == name:
+                result.append(current.item)
+            current = current.next
+        self._find_by_name(node.left, name, result)
+        self._find_by_name(node.right, name, result)
+  ```
+
+Code Optimization for Finding Items by Name in Category Tree
+
+- **Recursive Traversal Approach:**
+  - Utilizes a recursive method to traverse the entire category tree.
+  - Examines the item linked list of each node.
+  - Adds any item with a matching name to the result list.
+
+- **Traversal Process:**
+  - Iterates through all nodes in the tree.
+  - Ensures all items with matching names are found, regardless of category.
+
+**(c) find_by_id(item_id)**:
+
+```python
+    def find_by_id(self, item_id):
+        return self._find_by_id(self.root, item_id)
+
+    def _find_by_id(self, node, item_id):  
+        if node is None:
+            return None
+        current = node.items.head
+        while current:
+            if current.item.item_ID == item_id:
+                return current.item
+            current = current.next
+        left_result = self._find_by_id(node.left, item_id)
+        if left_result:
+            return left_result
+        return self._find_by_id(node.right, item_id)
+  ```
+
+Code Optimization for Finding Items by ID in Category Tree
+
+- **Recursive Traversal Approach:**
+  - Utilizes recursion to traverse all nodes in the category tree.
+  - Checks the item linked list of each node for a matching ID.
+  - Returns the item immediately if found in the current node.
+
+- **Handling Subtrees:**
+  - Searches the left subtree first if the ID is not found in the current node.
+  - Continues searching the right subtree if not found in the left subtree.
+
+- **Efficiency Considerations:**
+  - Ensures efficient searching for an item with a specific ID throughout the entire tree structure.
+
+**(d) remove(item_id)**:
+
+```python
+    def remove(self, item_id):
+        self.root = self._remove(self.root, item_id)
+
+    def _remove(self, node, item_id):
+        if node is None:
+            return None
+
+        current = node.items.head
+        while current:
+            if current.item.item_ID == item_id:
+                node.items.remove_item(item_id)
+                if node.items.head is None:
+                    return self._remove_node(node)
+                return node
+            current = current.next
+
+        node.left = self._remove(node.left, item_id)
+        node.right = self._remove(node.right, item_id)
+        return node
+```
+
+Code Optimization for Removing Items by ID in Category Tree
+
+- **Recursive Traversal Approach:**
+  - Utilizes recursion to traverse each node in the category tree.
+  - Checks if the node’s item linked list contains the item with the specified ID.
+  - Removes the item from the linked list if found.
+
+- **Handling Empty Linked Lists:**
+  - Calls the `_remove_node` method to remove the entire node if the linked list becomes empty after removal.
+
+- **Handling Subtrees:**
+  - Continues searching in the left and right subtrees if the target item is not found in the current node.
+
+- **Maintaining Structural Integrity:**
+  - Ensures that the specified item can be found and removed throughout the entire tree structure while maintaining its integrity.
+
+#### 4.2.4 Advantages of CategoryTree
+
+- **Fast lookup**: For finding items by category, the average time complexity is O(log n).
+
+- **Ordered nature**: Naturally maintains an ordered structure of categories.
+
+- **Flexibility**: New categories can be easily added.
+
+- **Application**: Used to organize and quickly retrieve inventory items of different categories.
